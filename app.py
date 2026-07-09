@@ -1,5 +1,5 @@
 
-   import streamlit as st
+ import streamlit as st
 import pickle
 import numpy as np
 import datetime
@@ -16,13 +16,10 @@ st.set_page_config(
 # ==================== CUSTOM CSS ====================
 st.markdown("""
     <style>
-    /* Main background */
     .main {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         padding: 20px;
     }
-    
-    /* Title styling */
     .main-title {
         text-align: center;
         font-size: 3rem;
@@ -32,8 +29,6 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         padding: 20px 0;
     }
-    
-    /* Button styling */
     .stButton>button {
         background: linear-gradient(45deg, #FF4B4B, #FF6B6B);
         color: white;
@@ -49,8 +44,6 @@ st.markdown("""
         transform: scale(1.02);
         box-shadow: 0 5px 20px rgba(255, 75, 75, 0.4);
     }
-    
-    /* Result card */
     .result-card {
         background: linear-gradient(135deg, #2E7D32, #4CAF50);
         padding: 30px;
@@ -69,8 +62,6 @@ st.markdown("""
         font-size: 1.2rem;
         margin: 10px 0 0 0;
     }
-    
-    /* Info boxes - cleaner */
     .info-box {
         background: #f8f9fa;
         padding: 15px;
@@ -78,8 +69,6 @@ st.markdown("""
         border: 1px solid #e0e0e0;
         margin: 10px 0;
     }
-    
-    /* Summary box - cleaner */
     .summary-box {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 20px;
@@ -97,23 +86,7 @@ st.markdown("""
     .summary-box li {
         margin: 8px 0;
     }
-    
-    /* Hide empty boxes */
-    .stNumberInput, .stSelectbox {
-        background: transparent;
-    }
-    .element-container {
-        background: transparent;
-    }
-    
-    /* Clean metric boxes */
-    .metric-box {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        border: 1px solid #e0e0e0;
-    }
+    .stDeployButton {display:none;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -156,11 +129,10 @@ with st.sidebar:
     st.caption("🏗️ Built with Streamlit ❤️")
 
 # ==================== MAIN CONTENT ====================
-# Title - Clean without extra text
 st.markdown('<h1 class="main-title">🏠 Zillow Home Value Predictor</h1>', unsafe_allow_html=True)
 st.markdown("---")
 
-# ==================== WEBSITE SUMMARY - CLEAN ====================
+# ==================== ABOUT SECTION ====================
 with st.expander("📖 About This Website", expanded=False):
     st.markdown("""
     <div class="summary-box">
@@ -197,7 +169,6 @@ with st.expander("📖 About This Website", expanded=False):
 # ==================== INPUT SECTION ====================
 st.subheader("📝 Enter Property Details")
 
-# Clean input columns - no white boxes
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -218,31 +189,21 @@ st.markdown("---")
 if st.button("🔮 Predict Price", type="primary"):
     try:
         with st.spinner("💰 Calculating your home value..."):
-            # Prepare data
             data = np.array([[bedrooms, bathrooms, sqft, floors]])
-            
-            # Make prediction in USD
             prediction_usd = float(model.predict(data)[0])
-            
-            # Convert to INR
             prediction_inr = prediction_usd * usd_to_inr
             
-            # ==================== REALISTIC VALUE CALCULATION ====================
-            # Calculate realistic value in lakhs
             base_value_lakhs = (sqft * 0.5) + (bedrooms * 10) + (bathrooms * 8) + (floors * 5)
             usd_factor = prediction_usd / 500000
             realistic_value_lakhs = base_value_lakhs * (0.8 + (usd_factor * 0.4))
             realistic_value_lakhs = max(20, min(realistic_value_lakhs, 200))
             
-            # Convert to INR
             realistic_inr = realistic_value_lakhs * 100000
             crores = realistic_value_lakhs / 100
             price_per_sqft = realistic_inr / sqft
             
-            # ==================== DISPLAY RESULTS ====================
             st.markdown("### 📊 Prediction Results")
             
-            # Result card
             st.markdown(f"""
                 <div class="result-card">
                     <p style="color: #e8f5e9; font-size: 1.2rem;">Estimated Home Value</p>
@@ -251,7 +212,6 @@ if st.button("🔮 Predict Price", type="primary"):
                 </div>
             """, unsafe_allow_html=True)
             
-            # Metrics in columns
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -275,7 +235,6 @@ if st.button("🔮 Predict Price", type="primary"):
                     delta=f"{price_per_sqft/1000:.2f}K"
                 )
             
-            # ==================== PROPERTY SUMMARY ====================
             st.markdown("---")
             st.markdown("### 📋 Property Summary")
             
@@ -300,11 +259,9 @@ if st.button("🔮 Predict Price", type="primary"):
                     </div>
                 """, unsafe_allow_html=True)
             
-            # ==================== MARKET COMPARISON ====================
             st.markdown("---")
             st.markdown("### 📊 Market Comparison")
             
-            # Clean comparison table
             comparison_data = {
                 "Category": ["Your Property", "Average", "Premium"],
                 "Value (₹ Lakhs)": [
@@ -322,13 +279,11 @@ if st.button("🔮 Predict Price", type="primary"):
             df = pd.DataFrame(comparison_data)
             st.dataframe(df, use_container_width=True, hide_index=True)
             
-            # ==================== PRICE RANGE ====================
             st.info(f"""
                 💡 **Estimated Price Range:** 
                 ₹{(realistic_inr * 0.9):,.0f} - ₹{(realistic_inr * 1.1):,.0f}
             """)
             
-            # Celebration
             st.balloons()
             st.success("✅ Prediction completed successfully!")
             
@@ -356,4 +311,3 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-    
