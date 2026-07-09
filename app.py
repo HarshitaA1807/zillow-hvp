@@ -31,19 +31,15 @@ if st.button("Predict Price"):
     data = np.array([
         [bedrooms, bathrooms, sqft, floors]
     ])
+    
+    prediction_inr = model.predict(data)[0]
 
-    prediction = model.predict(data)[0]
+    usd_to_inr = 83.5
+    prediction_inr = prediction_usd * usd_to_inr
 
     st.success(
-        f"Estimated Home Value: ${prediction:,.0f}"
+        f"Estimated Home Value: ₹{prediction:,.0f}"
     )
     
-usd_to_inr = st.sidebar.number_input(
-    "USD to INR Rate",
-    value=83.5,
-    step=0.1
-)
-
-prediction_inr = prediction_usd * usd_to_inr
 
     
