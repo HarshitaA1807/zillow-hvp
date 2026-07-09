@@ -32,7 +32,7 @@ if st.button("Predict Price"):
         [bedrooms, bathrooms, sqft, floors]
     ])
     
-    prediction_inr = model.predict(data)[0]
+    prediction_usd = float(model.predict(data)[0])
 
     usd_to_inr = 83.5
     prediction_inr = prediction_usd * usd_to_inr
