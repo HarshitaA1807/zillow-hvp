@@ -37,5 +37,14 @@ if st.button("Predict Price"):
     st.success(
         f"Estimated Home Value: ${prediction:,.0f}"
     )
+    # Add a sidebar input for exchange rate
+usd_to_inr = st.sidebar.number_input(
+    "USD to INR Rate",
+    value=83.5,
+    step=0.1
+)
+
+# Then use it in calculation
+prediction_inr = prediction_usd * usd_to_inr
 
     
