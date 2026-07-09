@@ -37,7 +37,5 @@ if st.button("Predict Price"):
     st.success(
         f"Estimated Home Value: ${prediction:,.0f}"
     )
-    st.success(
-    f"Estimated Home Value: ${prediction:,.0f}"
-)
+
     
