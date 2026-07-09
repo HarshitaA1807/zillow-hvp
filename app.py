@@ -37,8 +37,7 @@ if st.button("Predict Price"):
     st.success(
         f"Estimated Home Value: ${prediction:,.0f}"
     )
-    from pyngrok import ngrok
-
-public_url = ngrok.connect(8501)
-
-print(public_url)
+    st.success(
+    f"Estimated Home Value: ${prediction:,.0f}"
+)
+    
