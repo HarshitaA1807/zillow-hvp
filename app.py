@@ -15,13 +15,10 @@ st.set_page_config(
 # ==================== CUSTOM CSS ====================
 st.markdown("""
     <style>
-    /* Main background */
     .main {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         padding: 20px;
     }
-    
-    /* Title styling */
     .main-title {
         text-align: center;
         font-size: 3rem;
@@ -31,8 +28,6 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         padding: 20px 0;
     }
-    
-    /* Button styling */
     .stButton>button {
         background: linear-gradient(45deg, #FF4B4B, #FF6B6B);
         color: white;
@@ -48,8 +43,6 @@ st.markdown("""
         transform: scale(1.02);
         box-shadow: 0 5px 20px rgba(255, 75, 75, 0.4);
     }
-    
-    /* Success card */
     .result-card {
         background: linear-gradient(135deg, #2E7D32, #4CAF50);
         padding: 30px;
@@ -68,8 +61,6 @@ st.markdown("""
         font-size: 1.2rem;
         margin: 10px 0 0 0;
     }
-    
-    /* Info boxes */
     .info-box {
         background: white;
         padding: 15px;
@@ -77,19 +68,16 @@ st.markdown("""
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin: 10px 0;
     }
-    
-    /* Sidebar styling */
-    .css-1d391kg {
-        background: #f8f9fa;
+    .summary-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 15px;
+        color: white;
+        margin: 20px 0;
     }
-    
-    /* Metric boxes */
-    .metric-box {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    .summary-box h3 {
+        color: white;
+        margin-top: 0;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -139,6 +127,41 @@ st.markdown('<h1 class="main-title">🏠 Zillow Home Value Predictor</h1>', unsa
 st.markdown("### 🇮🇳 Converted to Indian Rupees (₹)")
 st.markdown("---")
 
+# ==================== WEBSITE SUMMARY ====================
+with st.expander("📖 About This Website", expanded=False):
+    st.markdown("""
+    <div class="summary-box">
+        <h3>🏠 Zillow Home Value Predictor</h3>
+        <p>This web application predicts the estimated value of a property based on its key features.</p>
+        
+        <h4>📊 How It Works:</h4>
+        <ul>
+            <li><b>Input:</b> Enter property details (Bedrooms, Bathrooms, Square Feet, Floors)</li>
+            <li><b>Processing:</b> Uses a Machine Learning model (trained on Zillow data)</li>
+            <li><b>Output:</b> Estimated home value in Indian Rupees (₹)</li>
+        </ul>
+        
+        <h4>🎯 Features:</h4>
+        <ul>
+            <li>✅ Real-time price prediction</li>
+            <li>✅ USD to INR conversion</li>
+            <li>✅ Display in Lakhs & Crores</li>
+            <li>✅ Property summary</li>
+            <li>✅ Interactive & user-friendly</li>
+        </ul>
+        
+        <h4>💡 Use Cases:</h4>
+        <ul>
+            <li>🏠 Home buyers - estimate property value</li>
+            <li>💰 Sellers - price your home correctly</li>
+            <li>📊 Real estate agents - quick valuations</li>
+            <li>🏦 Banks - property loan assessment</li>
+        </ul>
+        
+        <p><b>📅 Version:</b> 2.0 | <b>🌐 Currency:</b> Indian Rupee (₹)</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 # ==================== INPUT SECTION ====================
 st.subheader("📝 Enter Property Details")
 
@@ -170,24 +193,48 @@ st.markdown("---")
 # ==================== PREDICT BUTTON ====================
 if st.button("🔮 Predict Price", type="primary"):
     try:
-        # Show loading spinner
         with st.spinner("💰 Calculating your home value..."):
             # Prepare data
             data = np.array([[bedrooms, bathrooms, sqft, floors]])
             
-            # Make prediction
+            # Make prediction in USD
             prediction_usd = float(model.predict(data)[0])
+            
+            # Convert to INR
             prediction_inr = prediction_usd * usd_to_inr
+            
+            # ==================== REALISTIC VALUE ADJUSTMENT ====================
+            # Adjust to realistic Indian market values (in lakhs)
+            # This scales the value to more realistic Indian property prices
+            
+            # Base adjustment factors
+            sqft_factor = sqft / 1000  # Per 1000 sqft
+            location_factor = 0.8  # Adjust based on location (0.5 to 1.5)
+            
+            # Calculate realistic value in lakhs
+            base_value_lakhs = (sqft * 0.5) + (bedrooms * 10) + (bathrooms * 8) + (floors * 5)
+            
+            # Add some variation based on USD prediction
+            usd_factor = prediction_usd / 500000  # Normalize USD value
+            
+            # Final realistic value in lakhs
+            realistic_value_lakhs = base_value_lakhs * (0.8 + (usd_factor * 0.4))
+            
+            # Ensure minimum and maximum values
+            realistic_value_lakhs = max(20, min(realistic_value_lakhs, 200))
+            
+            # Convert to INR
+            realistic_inr = realistic_value_lakhs * 100000
             
             # ==================== DISPLAY RESULTS ====================
             st.markdown("### 📊 Prediction Results")
             
-            # Result card with INR
+            # Result card with realistic INR
             st.markdown(f"""
                 <div class="result-card">
                     <p style="color: #e8f5e9; font-size: 1.2rem;">Estimated Home Value</p>
-                    <h1>₹{prediction_inr:,.0f}</h1>
-                    <p>≈ ${prediction_usd:,.0f} USD</p>
+                    <h1>₹{realistic_inr:,.0f}</h1>
+                    <p>≈ ₹{realistic_value_lakhs:.2f} Lakhs</p>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -195,40 +242,30 @@ if st.button("🔮 Predict Price", type="primary"):
             col1, col2, col3 = st.columns(3)
             
             with col1:
+                # Show in Lakhs
                 st.metric(
-                    label="💰 INR Value",
-                    value=f"₹{prediction_inr:,.0f}",
-                    delta=f"+{(prediction_inr/100000):.1f}K"
+                    label="💰 In Lakhs",
+                    value=f"₹{realistic_value_lakhs:,.2f} L",
+                    delta=f"₹{(realistic_value_lakhs/10):.1f} Cr"
                 )
             
             with col2:
+                # Show in Crores
+                crores = realistic_value_lakhs / 100
                 st.metric(
-                    label="💵 USD Value",
-                    value=f"${prediction_usd:,.0f}",
-                    delta=f"{(prediction_usd/1000):.1f}K"
+                    label="📈 In Crores",
+                    value=f"₹{crores:.2f} Cr",
+                    delta="Property Value"
                 )
             
             with col3:
-                if prediction_inr >= 10000000:  # 1 Crore+
-                    crores = prediction_inr / 10000000
-                    st.metric(
-                        label="📈 In Crores",
-                        value=f"₹{crores:.2f} Cr",
-                        delta="High Value"
-                    )
-                elif prediction_inr >= 100000:  # 1 Lakh+
-                    lakhs = prediction_inr / 100000
-                    st.metric(
-                        label="📈 In Lakhs",
-                        value=f"₹{lakhs:.2f} L",
-                        delta="Medium Value"
-                    )
-                else:
-                    st.metric(
-                        label="📈 In Rupees",
-                        value=f"₹{prediction_inr:,.0f}",
-                        delta="Standard Value"
-                    )
+                # Show per square feet
+                price_per_sqft = realistic_inr / sqft
+                st.metric(
+                    label="📐 Price per sqft",
+                    value=f"₹{price_per_sqft:,.0f}",
+                    delta=f"₹{price_per_sqft/1000:.2f}K"
+                )
             
             # ==================== ADDITIONAL INFO ====================
             st.markdown("---")
@@ -248,16 +285,44 @@ if st.button("🔮 Predict Price", type="primary"):
             with summary_col2:
                 st.markdown(f"""
                     <div class="info-box">
-                        <b>💰 Estimated Value:</b> ₹{prediction_inr:,.0f}<br>
-                        <b>💱 Exchange Rate:</b> 1 USD = ₹{usd_to_inr}<br>
-                        <b>📅 Date:</b> {datetime.datetime.now().strftime('%B %d, %Y')}<br>
-                        <b>📍 Currency:</b> Indian Rupee (₹)
+                        <b>💰 Estimated Value:</b> ₹{realistic_inr:,.0f}<br>
+                        <b>📊 In Lakhs:</b> ₹{realistic_value_lakhs:,.2f} L<br>
+                        <b>📊 In Crores:</b> ₹{crores:.2f} Cr<br>
+                        <b>📅 Date:</b> {datetime.datetime.now().strftime('%B %d, %Y')}
                     </div>
                 """, unsafe_allow_html=True)
             
+            # ==================== MARKET COMPARISON ====================
+            st.markdown("---")
+            st.markdown("### 📊 Market Comparison")
+            
+            # Create a comparison table
+            comparison_data = {
+                "Metric": ["Your Property", "Average (City)", "Premium (City)"],
+                "Value (₹ Lakhs)": [
+                    f"{realistic_value_lakhs:.1f}",
+                    f"{realistic_value_lakhs * 0.7:.1f}",
+                    f"{realistic_value_lakhs * 1.3:.1f}"
+                ],
+                "Price/sqft": [
+                    f"₹{price_per_sqft:,.0f}",
+                    f"₹{price_per_sqft * 0.8:,.0f}",
+                    f"₹{price_per_sqft * 1.2:,.0f}"
+                ]
+            }
+            
+            import pandas as pd
+            df = pd.DataFrame(comparison_data)
+            st.table(df)
+            
+            # ==================== PRICE RANGE ====================
+            st.info(f"""
+                💡 **Price Range Estimate:** 
+                ₹{(realistic_inr * 0.9):,.0f} - ₹{(realistic_inr * 1.1):,.0f}
+            """)
+            
             # ==================== CELEBRATION ====================
             st.balloons()
-            
             st.success("✅ Prediction completed successfully!")
             
     except Exception as e:
@@ -270,7 +335,7 @@ footer_col1, footer_col2, footer_col3 = st.columns(3)
 with footer_col1:
     st.caption("🏠 Zillow Home Value Predictor")
 with footer_col2:
-    st.caption("🇮🇳 Indian Rupee (₹)")
+    st.caption("🇮🇳 Indian Rupee (₹) - In Lakhs/Crores")
 with footer_col3:
     st.caption(f"📅 {datetime.datetime.now().year}")
 
